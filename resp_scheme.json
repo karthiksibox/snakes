@@ -1,0 +1,16 @@
+{
+    "players": [
+        {
+            "id": 1,
+            "snake": {
+                "height": 1
+            }
+        },
+        {
+            "id": 1,
+            "snake": {
+                "height": 1
+            }
+        }
+    ]
+}
