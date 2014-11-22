@@ -14,6 +14,11 @@ globals=function(){};
   globals.directions['down']=3;
 
 }());
+var app = express();
+
+var http = require('http').Server(app);
+var io = require('socket.io')(4567);
+
 ws=null;
 io.sockets.on('connection', function (socket) {
   ws=socket;
@@ -29,10 +34,6 @@ io.sockets.on('connection', function (socket) {
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
-var app = express();
-
-var http = require('http').Server(app);
-var io = require('socket.io')(4567);
 http.listen();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
