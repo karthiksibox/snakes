@@ -194,7 +194,7 @@ $( document ).ready(function() {
 
   GAME.init();
 
-  socket=io("https://localhost:4567");
+  socket=io("http://localhost:4567");
   socket.on('update',function(data){
     apple=data;
     paint_apple(apple);
