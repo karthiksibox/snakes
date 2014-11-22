@@ -16,7 +16,7 @@
 
 
   
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="public/javascripts/jquery_min.js"></script>
     <script>
 
 
@@ -240,6 +240,9 @@ JS_SNAKE.apple = function () {
 JS_SNAKE.snake = function () {
   var previousPosArray;
   var posArray = [];
+  posArray.push([9, 4]);
+  posArray.push([8, 4]);
+  posArray.push([7, 4]);
   posArray.push([6, 4]);
   posArray.push([5, 4]);
   var direction = 'right';

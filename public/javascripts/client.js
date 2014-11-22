@@ -1,358 +1,205 @@
-var JS_SNAKE = {};
+function paint_snake(array){
+  var floor=document.getElementById('floor');
+  floor=floor.getContext('2d');
+  floor.fillStyle = '#33a';
+  array.forEach(function(cord,i){
+    if(i==0){
+      floor.fillStyle = '#e22c56';
+    }
+    floor.fillRect(cord.x,cord.y,10,10);
+    if(i==0){
+  floor.fillStyle = '#33a';
 
-
-JS_SNAKE.equalCoordinates = function (coord1, coord2) {
-  return coord1[0] === coord2[0] && coord1[1] === coord2[1];
+    }
+    
+  });
 }
 
-JS_SNAKE.checkCoordinateInArray = function (coord, arr) {
-  var isInArray = false;
-  $.each(arr, function (index, item) {
-    if (JS_SNAKE.equalCoordinates(coord, item)) {
-      isInArray = true;
+function paint_apple(food){
+  var floor=document.getElementById('floor');
+  floor=floor.getContext('2d');
+  floor.fillStyle = '#088A29';
+  floor.beginPath();
+  floor.arc(food.x, food.y, 5, 0, 2 * Math.PI);
+  floor.fill();
+  apple=food;
+}
+
+
+var snake=null;
+var apple=null;
+function bindEvents() {
+  var keysToDirections = {
+    37: 'left',
+    38: 'up',
+    39: 'right',
+    40: 'down'
+  };
+
+  $(document).keydown(function (event) {
+    var key = event.which;
+    var direction = keysToDirections[key];
+
+    if (direction) {
+      $(document).trigger('move',direction);
+    }
+    else if (key === 32) {
+      snake.split(ctx);
     }
   });
-  return isInArray;
-};
 
-JS_SNAKE.game = (function () {
-  var canvas, ctx;
-  var frameLength;
-  var snake;
-  var apple;
-  var score;
-  var timeout;
-  JS_SNAKE.width = 700;
-  JS_SNAKE.height = 700;
-  JS_SNAKE.blockSize = 10;
-  JS_SNAKE.widthInBlocks = JS_SNAKE.width / JS_SNAKE.blockSize;
-  JS_SNAKE.heightInBlocks = JS_SNAKE.height / JS_SNAKE.blockSize;
+}
 
-  function init() {
-    var $canvas = $('#floor');
-    if ($canvas.length === 0) {
-      $('body').append('<canvas id="floor">');
-    }
-    $canvas = $('#floor');
-    $canvas.attr('width', JS_SNAKE.width);
-    $canvas.attr('height', JS_SNAKE.height);
-    canvas = $canvas[0];
-    ctx = canvas.getContext('2d');
-    score = 0;
-    frameLength = 500;
-  $.ajax({
-    type: "GET",
-    url: '/board',
-    success: function(d){
-      console.log(d);
-    }
-  });
-    
-    snake = JS_SNAKE.snake();
-    apple = JS_SNAKE.apple();
-    bindEvents();
-    gameLoop();
+function player(){
+  var id;
+  var posArray=[];
+  var previousPosArray=[];
+  var grown=false;
+  var speed=3;
+  var allowedDirections=['up','down','left','right'];
+  function init(a){
+    id=player.id;
+    posArray=a.posArray;
+    previousPosArray=a.posArray;
+    $(document).on('move',move);
   }
 
-  function gameLoop() {
-    <!--ctx.clearRect(0, 0, JS_SNAKE.width, JS_SNAKE.height);-->
-    <!--snake.advance(apple);-->
-    <!--//draw();-->
-
-    if (snake.checkCollision()) {
-      snake.retreat(); //move snake back to previous position
-      snake.draw(ctx); //draw snake in its previous position
-      gameOver();
-    }
-    else {
-      timeout = setTimeout(gameLoop, frameLength);
-    }
-  }
-
-  function draw() {
-    snake.draw(ctx);
-    drawBorder();
-    apple.draw(ctx);
-    drawScore();
-  }
-
-  function drawScore() {
-    ctx.save();
-    ctx.font = 'bold 102px sans-serif';
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    var centreX = JS_SNAKE.width / 2;
-    var centreY = JS_SNAKE.width / 2;
-    ctx.fillText(score.toString(), centreX, centreY);
-    ctx.restore();
-  }
-
-  function gameOver() {
-    ctx.save();
-    ctx.font = 'bold 30px sans-serif';
-    ctx.fillStyle = '#000';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
-    var centreX = JS_SNAKE.width / 2;
-    var centreY = JS_SNAKE.width / 2;
-    ctx.strokeText('Game Over', centreX, centreY - 10);
-    ctx.fillText('Game Over', centreX, centreY - 10);
-    ctx.font = 'bold 15px sans-serif';
-    ctx.strokeText('Press space to restart', centreX, centreY + 15);
-    ctx.fillText('Press space to restart', centreX, centreY + 15);
-    ctx.restore();
-  }
-
-  function drawBorder() {
-    ctx.save();
-    ctx.strokeStyle = 'gray';
-    ctx.lineWidth = JS_SNAKE.blockSize;
-    ctx.lineCap = 'square';
-    var offset = ctx.lineWidth / 2;
-    var corners = [
-      [offset, offset],
-      [JS_SNAKE.width - offset, offset],
-      [JS_SNAKE.width - offset, JS_SNAKE.height - offset],
-      [offset, JS_SNAKE.height - offset]
-    ];
-    ctx.beginPath();
-    ctx.moveTo(corners[3][0], corners[3][1]);
-    $.each(corners, function (index, corner) {
-      ctx.lineTo(corner[0], corner[1]);
-    });
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function restart() {
-    clearTimeout(timeout);
-    $('body').unbind('keydown');
-    $(JS_SNAKE).unbind('appleEaten');
-    $(canvas).unbind('click');
-    JS_SNAKE.game.init();
-  }
-  
-  function bindEvents() {
-    var keysToDirections = {
-      37: 'left',
-      38: 'up',
-      39: 'right',
-      40: 'down'
-    };
-
-    $(document).keydown(function (event) {
-      var key = event.which;
-      var direction = keysToDirections[key];
-
-      if (direction) {
-        snake.setDirection(direction);
-        event.preventDefault();
-        ctx.clearRect(0,0,700,700);
-        snake.advance(apple);
-        draw();
+  function move(){
+    direction = arguments[1];
+    var nextPosition = posArray[0];
+    switch (direction) {
+      case 'left':
+        if(allowedDirections.indexOf(direction)>-1){
+        posArray.unshift({'x' : posArray[0].x-speed, 'y': posArray[0].y});
+        allowedDirections=['up','left','down'];
+        }
+        else{
+          allowedDirections.unshift('NA');
+        }
+        break;
+      case 'up':
+        if(allowedDirections.indexOf(direction)>-1){
+        posArray.unshift({'x' : posArray[0].x, 'y': posArray[0].y-speed});
+        allowedDirections.shift();
+        allowedDirections=['right','left','up'];
+ 
+        }
+        else{
+          allowedDirections.unshift('NA');
+        }
+        break;
+      case 'right':
+        if(allowedDirections.indexOf(direction)>-1){
+        posArray.unshift({'x' : posArray[0].x+speed, 'y': posArray[0].y});
+        allowedDirections=['right','up','down'];
+        }
+        else{
+          allowedDirections.unshift('NA');
+        }
+        break;
+      case 'down':
+        if(allowedDirections.indexOf(direction)>-1){
         
-      }
-      else if (key === 32) {
-        snake.split(ctx);
-      }
-    });
-
-    $(JS_SNAKE).bind('appleEaten', function (event, snakePositions) {
-      apple.setNewPosition(snakePositions);
-      score++;
-      frameLength *= 0.99; //subtle speed-up
-    });
-
-    $(canvas).click(restart);
-  }
-
-  return {
-    init: init
-  };
-})();
-
-JS_SNAKE.apple = function () {
-  var position = [6, 6];
-
-  function draw(ctx) {
-    ctx.save();
-    ctx.fillStyle = '#0a0'; //apple green
-    ctx.beginPath();
-    var radius = JS_SNAKE.blockSize / 2;
-    var x = position[0] * JS_SNAKE.blockSize + radius;
-    var y = position[1] * JS_SNAKE.blockSize + radius;
-    ctx.arc(x, y, radius, 0, Math.PI * 2, true);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  function random(low, high) {
-    return Math.floor(Math.random() * (high - low + 1) + low);
-  }
-
-  //get a random position within the game bounds
-  function getRandomPosition() {
-    var x = random(1, JS_SNAKE.widthInBlocks - 2);
-    var y = random(1, JS_SNAKE.heightInBlocks - 2);
-    return [x, y];
-  }
-
-  function setNewPosition(snakeArray) {
-    var newPosition = getRandomPosition();
-    //if new position is already covered by the snake, try again
-    if (JS_SNAKE.checkCoordinateInArray(newPosition, snakeArray)) {
-      return setNewPosition(snakeArray);
-    }
-    //otherwise set position to the new position
-    else {
-      position = newPosition;
-    }
-  }
-
-  function getPosition() {
-    return position;
-  }
-
-  return {
-    draw: draw,
-    setNewPosition: setNewPosition,
-    getPosition: getPosition
-  };
-};
-
-JS_SNAKE.snake = function () {
-  var previousPosArray;
-  var posArray = [];
-  posArray.push([6, 4]);
-  posArray.push([5, 4]);
-  var direction = 'right';
-  var nextDirection = direction;
-
-  function setDirection(newDirection) {
-    var allowedDirections;
-
-    switch (direction) {
-    case 'left':
-    case 'right':
-      allowedDirections = ['up', 'down'];
-      break;
-    case 'up':
-    case 'down':
-      allowedDirections = ['left', 'right'];
-      break;
-    default:
-      throw('Invalid direction');
-    }
-    if (allowedDirections.indexOf(newDirection) > -1) {
-      nextDirection = newDirection;
-    }
-  }
-
-  function drawSection(ctx, position) {
-    var x = JS_SNAKE.blockSize * position[0];
-    var y = JS_SNAKE.blockSize * position[1];
-    ctx.fillRect(x, y, JS_SNAKE.blockSize, JS_SNAKE.blockSize);
-  }
-
-  function draw(ctx) {
-    ctx.save();
-    ctx.fillStyle = '#33a';
-    for(var i = 0; i < posArray.length; i++) {
-      drawSection(ctx, posArray[i]);
-    }
-  }
-
-  function checkCollision() {
-    var wallCollision = false;
-    var snakeCollision = false;
-    var head = posArray[0]; //just the head
-    var rest = posArray.slice(1); //the rest of the snake
-    var snakeX = head[0];
-    var snakeY = head[1];
-    var minX = 1;
-    var minY = 1;
-    var maxX = JS_SNAKE.widthInBlocks - 1;
-    var maxY = JS_SNAKE.heightInBlocks - 1;
-    var outsideHorizontalBounds = snakeX < minX || snakeX >= maxX;
-    var outsideVerticalBounds = snakeY < minY || snakeY >= maxY;
-
-    if (outsideHorizontalBounds || outsideVerticalBounds) {
-      wallCollision = true;
-    }
-    //check if the snake head coords overlap the rest of the snake
-    snakeCollision = JS_SNAKE.checkCoordinateInArray(head, rest);
-    return wallCollision || snakeCollision;
-  }
-
-  function advance(apple) {
-    //make a copy of the head of the snake otherwise
-    //the changes below would affect the head of the snake
-    var nextPosition = posArray[0].slice();
-    direction = nextDirection;
-    switch (direction) {
-    case 'left':
-      nextPosition[0] -= 1;
-      break;
-    case 'up':
-      nextPosition[1] -= 1;
-      break;
-    case 'right':
-      nextPosition[0] += 1;
-      break;
-    case 'down':
-      nextPosition[1] += 1;
-      break;
-    default:
-      throw('Invalid direction');
+        posArray.unshift({'x' : posArray[0].x , 'y': posArray[0].y+speed});
+        allowedDirections=['right','left','down'];
+        
+        }
+        else{
+          
+          allowedDirections.unshift('NA');
+        }
+        
+        break;
+      default:
+        throw('Invalid direction');
     }
 
-    previousPosArray = posArray.slice(); //save previous array
-    posArray.unshift(nextPosition);
-    if (isEatingApple(posArray[0], apple)) {
-      $(JS_SNAKE).trigger('appleEaten', [posArray]);
-    }
-    else {
+    var floor=document.getElementById('floor');
+    floor=floor.getContext('2d');
+    floor.fillStyle = '#33a';
+    floor.clearRect(0,0,700,700);
+
+    paint_snake(posArray);
+    if(!grown && allowedDirections[0]!='NA'){
       posArray.pop();
     }
-    socket.emit('move',posArray)
-  }
-
-  function isEatingApple(head, apple) {
-    return JS_SNAKE.equalCoordinates(head, apple.getPosition());
-  }
-
-
-  function split(){
-
-    debugger;
+    else{
+      grown=false;
+    }
+    check_collision(nextPosition);
+    paint_apple(apple);
 
   }
 
-  function retreat() {
-    posArray = previousPosArray;
-  }
-  return {
-    draw: draw,
-    advance: advance,
-    retreat: retreat,
-    setDirection: setDirection,
-    checkCollision: checkCollision,
-    split: split
-  };
-};
+  function check_collision(snake_head){
+    if(Math.abs(snake_head.x - apple.x) <=3){
+      posArray[posArray.length]={'x': posArray[posArray.length-1].x+2,'y': posArray[posArray.length-1].y+2}
+      grown=true;
 
+    }
+  }
+
+
+
+
+  return{
+    init: init
+  }
+}
+
+
+function game(){
+
+
+  var floor=document.getElementById('floor');
+  floor=floor.getContext('2d');
+  floor.fillStyle = '#33a';
+
+  function positionPlayers(data){
+    var players=data.players;
+    players.forEach(function(player){
+      paint_snake(player.posArray);
+    });
+
+    paint_apple(data.apple)
+      //assinging first player should be generated by users
+      player().init(players[0])
+  }
+
+
+  function init(){
+    $.ajax({
+      type: "GET",
+      url: '/board',
+      success: positionPlayers 
+    });
+    bindEvents();
+
+
+  }
+
+
+  return{
+    init: init
+  }
+}
+
+
+var GAME= new game();
 
 $( document ).ready(function() {
-  JS_SNAKE.game.init();
+  $('body').append('<canvas id="floor">');
+  document.getElementById('floor').width=window.innerWidth-100;
+  document.getElementById('floor').height=400;
+
+  GAME.init();
 
   socket=io("http://localhost:4567");
-  socket.on('move',function(data){
-    console.log(data);
-  })
-  
+  socket.on('update',function(data){
+    apple=data;
+    paint_apple(apple);
+  });
+
 });
 
 

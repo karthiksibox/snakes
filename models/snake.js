@@ -1,8 +1,8 @@
 snake = function () {
   var previousPosArray;
   var posArray = [];
-  posArray.push([6, 4]);
-  posArray.push([5, 4]);
+  posArray.push([Math.random() * (6 - 3) + 3, Math.random() * (8 - 2) + 2]);
+  posArray.push([Math.random() * (5 - 1) + 1, Math.random() * (7 - 3) + 3]);
   var direction = 'right';
   var nextDirection = direction;
 
@@ -109,4 +109,33 @@ snake = function () {
     checkCollision: checkCollision
   };
 };
+
+
+snake=function(){
+
+  var previousPosArray;
+  var posArray = [];
+  //posArray.push({'x': 6,'y': 4});
+  //posArray.push({'x': 5,'y': 4});
+  //
+  var head=Math.floor((Math.random()*10)+3)+10;
+  posArray.push({'x': head,'y': 3});
+  posArray.push({'x': head-5,'y': 3});
+  posArray.push({'x': head-14,'y': 3});
+  posArray.push({'x': head-20,'y': 3});
+  
+ 
+  var direction = 'right';
+  var nextDirection = direction;
+
+  return {
+    id: 1,
+    posArray: posArray
+
+  }
+}
+
+module.exports={
+  player: snake
+}
 

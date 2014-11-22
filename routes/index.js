@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var board=require('../models/board');
 next_available_id=1;
 function get_new_id(){
   return next_available_id++;
@@ -42,17 +43,17 @@ router.get('/', function(req, res) {
 });
 
 router.get('/board', function(req, res) {
-  var player=new Player();
-  boards[0]=new Board(player,boards[0]);
-  player=new Player();
-  boards[0]=new Board(player,boards[0]);
-  boards[0].players[1].x=30;
-  player=new Player();
-  boards[0]=new Board(player,boards[0]);
-  boards[0].players[2].x=90;
+  //var player=new Player();
+  //boards[0]=new Board(player,boards[0]);
+  //player=new Player();
+  //boards[0]=new Board(player,boards[0]);
+  //boards[0].players[1].x=30;
+  //player=new Player();
+  //boards[0]=new Board(player,boards[0]);
+  //boards[0].players[2].x=90;
   
-  var resp=boards[0];  
-  res.send(resp);
+  //var resp=boards[0];  
+  res.send(board.board());
 });
 
 

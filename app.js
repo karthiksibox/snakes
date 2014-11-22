@@ -86,12 +86,15 @@ module.exports = app;
 //server.listen(app.get('port'), function(){
   //console.log('Express server listening on port ' + app.get('port'));
 //});
-
+ws=null;
 io.sockets.on('connection', function (socket) {
+  ws=socket;
   socket.emit('news', { hello: 'world' });
   socket.on('move', function (data) {
     console.log(data);
-    socket.emit('update',data);
   });
+
+
+
 });
 
